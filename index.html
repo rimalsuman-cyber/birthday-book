@@ -720,6 +720,17 @@ document.addEventListener("click", (e) => {
 });
 // Escape closes it too (in addition to the existing Escape-closes-modal handler below).
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSettings(); });
+// Once the user makes a choice inside the menu, close it automatically — a
+// selection (language change, theme toggle, or any row action) is the user's
+// way of saying they're done, so there's no need for a second click to dismiss it.
+$("#settingsMenu").addEventListener("change", (e) => {
+  if (e.target.id === "langSel") closeSettings();
+});
+$("#settingsMenu").addEventListener("click", (e) => {
+  // Only buttons count as "a selection was made" — clicking to open the
+  // language <select> itself is not a button, so it won't prematurely close.
+  if (e.target.closest("button")) closeSettings();
+});
 
 /* ---------- Wire up controls ---------- */
 $("#addBtn").onclick = () => openModal(null);
