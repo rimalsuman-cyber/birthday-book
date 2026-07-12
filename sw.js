@@ -1,6 +1,6 @@
 // Service worker: cache the app shell so it works offline once installed.
 // Bump CACHE version whenever you change the app files.
-const CACHE = "birthday-book-v1";
+const CACHE = "birthday-book-v2";
 const ASSETS = [
   "./",
   "./index.html",
