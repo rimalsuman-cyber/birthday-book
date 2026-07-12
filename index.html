@@ -54,15 +54,58 @@
   }
 
   /* ---------- Layout ---------- */
+  /* Three-column grid keeps the title mathematically centered regardless of
+     how wide the settings control on the right ends up being — the empty
+     left column always mirrors the right column's track width. */
   header {
     position: sticky; top: 0; z-index: 20;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
     padding: 14px 20px;
-    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    column-gap: 12px;
   }
-  header h1 { font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 8px; }
-  header .spacer { flex: 1; }
+  header h1 {
+    grid-column: 2;
+    justify-self: center;
+    font-size: 1.55rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0;
+    display: flex; align-items: center; gap: 8px;
+    white-space: nowrap;
+  }
+
+  /* ---------- Settings popover ---------- */
+  .settings-wrap { grid-column: 3; justify-self: end; position: relative; }
+  .settings-menu {
+    position: absolute; top: calc(100% + 10px); right: 0;
+    min-width: 250px; max-width: calc(100vw - 32px);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: 0 16px 40px rgba(0,0,0,.2);
+    padding: 10px; z-index: 60;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .settings-menu[hidden] { display: none; }
+  .settings-menu .settings-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 8px 8px;
+  }
+  .settings-menu .settings-row > span { font-size: .86rem; font-weight: 600; }
+  .settings-menu .settings-row select { width: auto; min-width: 140px; }
+  .settings-menu hr {
+    border: none; border-top: 1px solid var(--border); margin: 6px 2px;
+  }
+  .settings-menu button.row-action {
+    width: 100%; display: flex; align-items: center; gap: 10px;
+    text-align: left; justify-content: flex-start;
+    border: none; background: transparent; color: var(--text);
+    padding: 9px 8px; border-radius: 8px; font-size: .86rem;
+  }
+  .settings-menu button.row-action:hover { background: var(--surface-2); }
+  .settings-menu button.row-action .ico { font-size: 1rem; width: 1.2em; text-align: center; }
 
   main { max-width: 1100px; margin: 0 auto; padding: 20px; }
 
@@ -167,22 +210,51 @@
   @media (max-width: 720px) {
     .dash { grid-template-columns: repeat(2, 1fr); }
     .modal .m-body { grid-template-columns: 1fr; }
-    header h1 { font-size: 1.1rem; }
+    header h1 { font-size: 1.25rem; }
+  }
+  @media (max-width: 420px) {
+    header { padding: 12px 14px; }
+    header h1 { font-size: 1.05rem; gap: 6px; }
+    .settings-menu { min-width: 220px; }
   }
 </style>
 </head>
 <body>
 <header>
+  <!-- Left column is intentionally empty; it mirrors the settings column's
+       width so the title lands dead-center regardless of screen size. -->
   <h1>🎂 <span data-i18n="app.title">Birthday Book</span></h1>
-  <div class="spacer"></div>
-  <!-- Language selector (populated from the registered i18n files) -->
-  <select id="langSel" style="width:auto" aria-label="Language" data-i18n-title="header.language"></select>
-  <button class="icon" id="themeBtn">🌙</button>
-  <button class="icon" id="importBtn" data-i18n-title="header.importTitle">⬆️ CSV</button>
-  <button class="icon" id="exportBtn" data-i18n-title="header.exportTitle">⬇️ CSV</button>
-  <button class="icon" id="backupBtn" data-i18n-title="header.backupTitle">💾</button>
-  <button class="icon" id="restoreBtn" data-i18n-title="header.restoreTitle">♻️</button>
-  <button class="primary" id="addBtn">＋ <span data-i18n="header.add">Add person</span></button>
+
+  <!-- Settings popover: consolidates language, theme, and the CSV/backup
+       actions that used to be five separate header icons. -->
+  <div class="settings-wrap">
+    <button class="icon" id="settingsBtn" aria-haspopup="true" aria-expanded="false"
+      aria-controls="settingsMenu" data-i18n-title="header.settingsTitle" title="Settings">⚙️</button>
+    <div class="settings-menu" id="settingsMenu" role="menu" hidden>
+      <div class="settings-row">
+        <span data-i18n="header.language">Language</span>
+        <!-- Language selector (populated from the registered i18n files) -->
+        <select id="langSel" aria-label="Language"></select>
+      </div>
+      <div class="settings-row">
+        <span data-i18n="header.theme">Theme</span>
+        <button class="icon" id="themeBtn">🌙</button>
+      </div>
+      <hr />
+      <button class="row-action" id="importBtn" data-i18n-title="header.importTitle">
+        <span class="ico">⬆️</span><span data-i18n="header.importTitle">Import CSV</span>
+      </button>
+      <button class="row-action" id="exportBtn" data-i18n-title="header.exportTitle">
+        <span class="ico">⬇️</span><span data-i18n="header.exportTitle">Export CSV</span>
+      </button>
+      <button class="row-action" id="backupBtn" data-i18n-title="header.backupTitle">
+        <span class="ico">💾</span><span data-i18n="header.backupTitle">Backup (JSON)</span>
+      </button>
+      <button class="row-action" id="restoreBtn" data-i18n-title="header.restoreTitle">
+        <span class="ico">♻️</span><span data-i18n="header.restoreTitle">Restore (JSON)</span>
+      </button>
+    </div>
+  </div>
 </header>
 
 <main>
@@ -208,6 +280,7 @@
       <button data-view="list" class="active" data-i18n="toolbar.viewList">List</button>
       <button data-view="calendar" data-i18n="toolbar.viewCalendar">Calendar</button>
     </div>
+    <button class="primary" id="addBtn">＋ <span data-i18n="header.add">Add person</span></button>
   </div>
 
   <!-- List view -->
@@ -623,6 +696,30 @@ function onLangChange() {
 }
 $("#langSel").onchange = (e) => I18N.setLang(e.target.value);
 document.addEventListener("i18n:change", onLangChange);
+
+/* ---------- Settings popover ---------- */
+// Consolidates language, theme, and the CSV/backup actions that used to be
+// five separate header icons into one gear-icon menu. Pure UI wiring — none
+// of the controls inside changed id, so their existing handlers are untouched.
+function isSettingsOpen() { return !$("#settingsMenu").hidden; }
+function openSettings() {
+  $("#settingsMenu").hidden = false;
+  $("#settingsBtn").setAttribute("aria-expanded", "true");
+}
+function closeSettings() {
+  $("#settingsMenu").hidden = true;
+  $("#settingsBtn").setAttribute("aria-expanded", "false");
+}
+$("#settingsBtn").onclick = (e) => {
+  e.stopPropagation();
+  isSettingsOpen() ? closeSettings() : openSettings();
+};
+// Click anywhere outside the popover closes it.
+document.addEventListener("click", (e) => {
+  if (isSettingsOpen() && !e.target.closest(".settings-wrap")) closeSettings();
+});
+// Escape closes it too (in addition to the existing Escape-closes-modal handler below).
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSettings(); });
 
 /* ---------- Wire up controls ---------- */
 $("#addBtn").onclick = () => openModal(null);
