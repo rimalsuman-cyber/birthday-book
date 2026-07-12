@@ -238,7 +238,11 @@
       </div>
       <div class="settings-row">
         <span data-i18n="header.theme">Theme</span>
-        <button class="icon" id="themeBtn">🌙</button>
+        <select id="themeSel" aria-label="Theme">
+          <option value="light" data-i18n="theme.light">Light</option>
+          <option value="dark" data-i18n="theme.dark">Dark</option>
+          <option value="system" data-i18n="theme.system">System (recommended)</option>
+        </select>
       </div>
       <hr />
       <button class="row-action" id="importBtn" data-i18n-title="header.importTitle">
@@ -662,16 +666,23 @@ $("#calNext").onclick = () => { calDate = new Date(calDate.getFullYear(), calDat
 $("#calToday").onclick = () => { calDate = startOfMonth(new Date()); renderCalendar(); };
 
 /* ---------- Theme ---------- */
-function applyTheme(th) {
-  document.documentElement.setAttribute("data-theme", th);
-  $("#themeBtn").textContent = th === "dark" ? "☀️" : "🌙";
-  $("#themeBtn").title = I18N.t(th === "dark" ? "header.themeLight" : "header.themeDark");
-  localStorage.setItem("bb_theme", th);
+// User preference is one of "light" | "dark" | "system" (stored as-is in
+// localStorage). "system" doesn't freeze to whatever the OS said at load
+// time — it keeps following OS changes for as long as it stays selected.
+const systemDark = matchMedia("(prefers-color-scheme: dark)");
+function resolveTheme(pref) {
+  return pref === "system" ? (systemDark.matches ? "dark" : "light") : pref;
 }
-$("#themeBtn").onclick = () =>
-  applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
-applyTheme(localStorage.getItem("bb_theme") ||
-  (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+function applyTheme(pref) {
+  document.documentElement.setAttribute("data-theme", resolveTheme(pref));
+  localStorage.setItem("bb_theme", pref);
+  $("#themeSel").value = pref;
+}
+$("#themeSel").onchange = (e) => applyTheme(e.target.value);
+systemDark.addEventListener("change", () => {
+  if (localStorage.getItem("bb_theme") === "system") applyTheme("system");
+});
+applyTheme(localStorage.getItem("bb_theme") || "system");
 
 /* ---------- i18n wiring ---------- */
 // Fill in every element that carries a data-i18n* attribute.
@@ -691,7 +702,6 @@ function onLangChange() {
   applyStatic();
   $("#langSel").value = I18N.current();
   document.title = "🎂 " + I18N.t("app.title");
-  applyTheme(document.documentElement.getAttribute("data-theme")); // refresh theme tooltip in new language
   render();
 }
 $("#langSel").onchange = (e) => I18N.setLang(e.target.value);
@@ -724,7 +734,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSetti
 // selection (language change, theme toggle, or any row action) is the user's
 // way of saying they're done, so there's no need for a second click to dismiss it.
 $("#settingsMenu").addEventListener("change", (e) => {
-  if (e.target.id === "langSel") closeSettings();
+  if (e.target.id === "langSel" || e.target.id === "themeSel") closeSettings();
 });
 $("#settingsMenu").addEventListener("click", (e) => {
   // Only buttons count as "a selection was made" — clicking to open the
