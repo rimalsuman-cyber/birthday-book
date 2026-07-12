@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>🎂 Birthday Book</title>
+<!-- PWA -->
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#6c5ce7" />
+<link rel="icon" href="icon-192.png" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Birthdays" />
+<style>
+  /* ---------- Theme tokens (light + dark) ---------- */
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #f0f1f4;
+    --text: #1c1e21;
+    --text-dim: #65676b;
+    --border: #e0e2e7;
+    --accent: #6c5ce7;
+    --accent-soft: #efeafc;
+    --today: #e84393;
+    --today-soft: #fde8f1;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.04);
+    --radius: 14px;
+  }
+  html[data-theme="dark"] {
+    --bg: #16181d;
+    --surface: #1f2229;
+    --surface-2: #262a33;
+    --text: #e7e9ee;
+    --text-dim: #9aa0ac;
+    --border: #333844;
+    --accent: #8c7cf0;
+    --accent-soft: #2a2745;
+    --today: #ff6fae;
+    --today-soft: #3a2434;
+    --shadow: 0 1px 3px rgba(0,0,0,.4), 0 4px 20px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- Layout ---------- */
+  header {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  header h1 { font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 8px; }
+  header .spacer { flex: 1; }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 20px; }
+
+  /* ---------- Buttons & inputs ---------- */
+  button {
+    font: inherit; cursor: pointer; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text);
+    padding: 8px 14px; border-radius: 10px; transition: .15s;
+  }
+  button:hover { background: var(--surface-2); }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  button.primary:hover { filter: brightness(1.08); }
+  button.icon { padding: 8px 10px; }
+  button.danger:hover { background: #ffecec; color: #d63031; border-color: #ffb8b8; }
+  html[data-theme="dark"] button.danger:hover { background: #3a2222; color: #ff8585; }
+
+  input, select, textarea {
+    font: inherit; width: 100%; padding: 9px 11px;
+    border: 1px solid var(--border); border-radius: 10px;
+    background: var(--surface); color: var(--text);
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  label { font-size: .8rem; color: var(--text-dim); display: block; margin-bottom: 4px; font-weight: 600; }
+
+  /* ---------- Dashboard cards ---------- */
+  .dash { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  .card .num { font-size: 1.8rem; font-weight: 700; }
+  .card .lbl { font-size: .78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: .04em; }
+  .card.accent .num { color: var(--today); }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; }
+  .toolbar .grow { flex: 1; min-width: 180px; }
+  .tabs { display: inline-flex; background: var(--surface-2); border-radius: 10px; padding: 3px; }
+  .tabs button { border: none; background: transparent; padding: 6px 14px; border-radius: 8px; }
+  .tabs button.active { background: var(--surface); box-shadow: var(--shadow); color: var(--accent); font-weight: 600; }
+
+  /* ---------- Person list ---------- */
+  .list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+  .person {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow);
+    display: flex; gap: 14px; position: relative;
+  }
+  .person.today { border-color: var(--today); background: var(--today-soft); }
+  .avatar {
+    width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
+    display: grid; place-items: center; font-weight: 700; font-size: 1.2rem;
+    color: #fff; background: var(--accent);
+  }
+  .person .info { flex: 1; min-width: 0; }
+  .person .name { font-weight: 700; font-size: 1.05rem; }
+  .person .rel { display: inline-block; font-size: .72rem; padding: 2px 8px; border-radius: 20px;
+    background: var(--accent-soft); color: var(--accent); margin-left: 6px; vertical-align: middle; }
+  .person .meta { font-size: .85rem; color: var(--text-dim); margin-top: 4px; }
+  .person .countdown { font-size: .8rem; margin-top: 6px; font-weight: 600; color: var(--accent); }
+  .person.today .countdown { color: var(--today); }
+  .person .row-actions { position: absolute; top: 12px; right: 12px; display: flex; gap: 6px; opacity: 0; transition: .15s; }
+  .person:hover .row-actions { opacity: 1; }
+  .person a.contact { color: var(--accent); text-decoration: none; }
+  .person a.contact:hover { text-decoration: underline; }
+  .empty { text-align: center; color: var(--text-dim); padding: 60px 20px; }
+
+  /* ---------- Calendar ---------- */
+  .cal-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .cal-head h2 { margin: 0; font-size: 1.1rem; flex: 1; }
+  .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .cal .dow { text-align: center; font-size: .72rem; color: var(--text-dim); font-weight: 700; padding: 4px 0; }
+  .cal .cell { background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    min-height: 78px; padding: 6px; font-size: .8rem; }
+  .cal .cell.empty-cell { background: transparent; border: none; }
+  .cal .cell .d { color: var(--text-dim); font-weight: 600; }
+  .cal .cell.is-today { border-color: var(--today); }
+  .cal .cell.is-today .d { color: var(--today); }
+  .cal .bday { margin-top: 3px; font-size: .72rem; background: var(--accent-soft); color: var(--accent);
+    border-radius: 6px; padding: 1px 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* ---------- Modal ---------- */
+  .backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none;
+    align-items: flex-start; justify-content: center; padding: 30px 16px; z-index: 50; overflow: auto; }
+  .backdrop.open { display: flex; }
+  .modal { background: var(--surface); border-radius: var(--radius); width: 100%; max-width: 560px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+  .modal .m-head { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; }
+  .modal .m-head h2 { margin: 0; font-size: 1.15rem; flex: 1; }
+  .modal .m-body { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .modal .m-body .full { grid-column: 1 / -1; }
+  .modal .m-foot { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+  /* ---------- Toast ---------- */
+  #toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--text); color: var(--bg); padding: 11px 18px; border-radius: 12px;
+    box-shadow: var(--shadow); opacity: 0; transition: .25s; z-index: 80; pointer-events: none; font-size: .9rem; }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 720px) {
+    .dash { grid-template-columns: repeat(2, 1fr); }
+    .modal .m-body { grid-template-columns: 1fr; }
+    header h1 { font-size: 1.1rem; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🎂 Birthday Book</h1>
+  <div class="spacer"></div>
+  <button class="icon" id="themeBtn" title="Toggle light/dark">🌙</button>
+  <button class="icon" id="importBtn" title="Import CSV">⬆️ CSV</button>
+  <button class="icon" id="exportBtn" title="Export CSV / Excel">⬇️ CSV</button>
+  <button class="icon" id="backupBtn" title="Backup all data (JSON)">💾</button>
+  <button class="icon" id="restoreBtn" title="Restore backup">♻️</button>
+  <button class="primary" id="addBtn">＋ Add person</button>
+</header>
+
+<main>
+  <!-- Dashboard -->
+  <section class="dash">
+    <div class="card"><div class="num" id="dTotal">0</div><div class="lbl">People</div></div>
+    <div class="card accent"><div class="num" id="dToday">0</div><div class="lbl">Today 🎉</div></div>
+    <div class="card"><div class="num" id="dMonth">0</div><div class="lbl">This month</div></div>
+    <div class="card"><div class="num" id="dNext" style="font-size:1.05rem">—</div><div class="lbl">Next up</div></div>
+  </section>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <input class="grow" id="search" placeholder="🔍 Search by name…" />
+    <select id="filterRel" style="width:auto"><option value="">All relationships</option></select>
+    <select id="sortBy" style="width:auto">
+      <option value="upcoming">Sort: Upcoming</option>
+      <option value="name">Sort: Name</option>
+      <option value="age">Sort: Age</option>
+      <option value="month">Sort: Month/Day</option>
+    </select>
+    <div class="tabs">
+      <button data-view="list" class="active">List</button>
+      <button data-view="calendar">Calendar</button>
+    </div>
+  </div>
+
+  <!-- List view -->
+  <div id="listView"><div class="list" id="list"></div></div>
+
+  <!-- Calendar view -->
+  <div id="calendarView" style="display:none">
+    <div class="cal-head">
+      <button class="icon" id="calPrev">‹</button>
+      <h2 id="calTitle"></h2>
+      <button class="icon" id="calNext">›</button>
+      <button class="icon" id="calToday">Today</button>
+    </div>
+    <div class="cal" id="cal"></div>
+  </div>
+</main>
+
+<!-- Add/Edit modal -->
+<div class="backdrop" id="backdrop">
+  <div class="modal">
+    <div class="m-head"><h2 id="modalTitle">Add person</h2></div>
+    <form id="personForm">
+      <div class="m-body">
+        <div class="full"><label>Full name *</label><input name="name" required /></div>
+        <div>
+          <label>Relationship</label>
+          <select name="relationship">
+            <option>Friend</option><option>Brother</option><option>Sister</option>
+            <option>Mother</option><option>Father</option><option>Uncle</option>
+            <option>Aunt</option><option>Cousin</option><option>Grandparent</option>
+            <option>Colleague</option><option>Partner</option><option>Other</option>
+          </select>
+        </div>
+        <div><label>Date of birth *</label><input type="date" name="dob" required /></div>
+        <div><label>Mobile number</label><input name="mobile" placeholder="+1 555 123 4567" /></div>
+        <div><label>Email</label><input type="email" name="email" /></div>
+        <div class="full"><label>Address</label><input name="address" /></div>
+        <div><label>Reminder preference</label>
+          <select name="reminder"><option>None</option><option>Same day</option><option>1 day before</option><option>1 week before</option></select>
+        </div>
+        <div><label>Favorite gift ideas</label><input name="gifts" /></div>
+        <div class="full"><label>Notes</label><textarea name="notes" rows="2"></textarea></div>
+      </div>
+      <div class="m-foot">
+        <button type="button" id="cancelBtn">Cancel</button>
+        <button type="submit" class="primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<input type="file" id="csvFile" accept=".csv" hidden />
+<input type="file" id="jsonFile" accept=".json" hidden />
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   Birthday Book — single-file app
+   Data lives in browser localStorage under key "birthdays_v1".
+   Each person: {id, name, relationship, dob (YYYY-MM-DD),
+     mobile, email, address, reminder, gifts, notes}
+   ============================================================ */
+
+const STORE_KEY = "birthdays_v1";
+const $ = (sel) => document.querySelector(sel);
+
+let people = load();
+let editingId = null;
+let view = "list";
+let calDate = startOfMonth(new Date());
+
+/* ---------- Persistence ---------- */
+function load() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+  catch { return []; }
+}
+function save() {
+  localStorage.setItem(STORE_KEY, JSON.stringify(people));
+  render();
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+/* ---------- Date helpers ---------- */
+function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
+function parseDOB(s) { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); }
+
+function calcAge(dob) {
+  const b = parseDOB(dob), t = new Date();
+  let age = t.getFullYear() - b.getFullYear();
+  const m = t.getMonth() - b.getMonth();
+  if (m < 0 || (m === 0 && t.getDate() < b.getDate())) age--;
+  return age;
+}
+// Days until the next occurrence of this birthday (0 = today).
+function daysUntil(dob) {
+  const b = parseDOB(dob), today = new Date();
+  today.setHours(0, 0, 0, 0);
+  let next = new Date(today.getFullYear(), b.getMonth(), b.getDate());
+  if (next < today) next.setFullYear(next.getFullYear() + 1);
+  return Math.round((next - today) / 86400000);
+}
+function isToday(dob) {
+  const b = parseDOB(dob), t = new Date();
+  return b.getMonth() === t.getMonth() && b.getDate() === t.getDate();
+}
+function fmtDate(dob) {
+  return parseDOB(dob).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+/* ---------- Toast ---------- */
+let toastTimer;
+function toast(msg) {
+  const el = $("#toast"); el.textContent = msg; el.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 2200);
+}
+
+/* ---------- Rendering ---------- */
+function render() { renderDashboard(); renderRelFilter(); (view === "list" ? renderList() : renderCalendar()); }
+
+function renderDashboard() {
+  $("#dTotal").textContent = people.length;
+  $("#dToday").textContent = people.filter(p => isToday(p.dob)).length;
+  const thisMonth = new Date().getMonth();
+  $("#dMonth").textContent = people.filter(p => parseDOB(p.dob).getMonth() === thisMonth).length;
+  const upcoming = [...people].sort((a, b) => daysUntil(a.dob) - daysUntil(b.dob))[0];
+  $("#dNext").textContent = upcoming
+    ? `${upcoming.name.split(" ")[0]} · ${daysUntil(upcoming.dob) === 0 ? "today" : daysUntil(upcoming.dob) + "d"}`
+    : "—";
+}
+
+function renderRelFilter() {
+  const sel = $("#filterRel"), cur = sel.value;
+  const rels = [...new Set(people.map(p => p.relationship).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">All relationships</option>' +
+    rels.map(r => `<option${r === cur ? " selected" : ""}>${esc(r)}</option>`).join("");
+}
+
+function currentFiltered() {
+  const q = $("#search").value.trim().toLowerCase();
+  const rel = $("#filterRel").value;
+  const sort = $("#sortBy").value;
+  let list = people.filter(p =>
+    (!q || p.name.toLowerCase().includes(q)) && (!rel || p.relationship === rel));
+  const sorters = {
+    upcoming: (a, b) => daysUntil(a.dob) - daysUntil(b.dob),
+    name: (a, b) => a.name.localeCompare(b.name),
+    age: (a, b) => calcAge(b.dob) - calcAge(a.dob),
+    month: (a, b) => parseDOB(a.dob).getMonth() - parseDOB(b.dob).getMonth()
+      || parseDOB(a.dob).getDate() - parseDOB(b.dob).getDate(),
+  };
+  return list.sort(sorters[sort]);
+}
+
+function initials(name) {
+  return name.trim().split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase();
+}
+// Deterministic pleasant color from a name.
+function colorFor(name) {
+  let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) % 360;
+  return `hsl(${h}, 55%, 55%)`;
+}
+
+function renderList() {
+  const list = currentFiltered();
+  const el = $("#list");
+  if (!people.length) {
+    el.innerHTML = `<div class="empty" style="grid-column:1/-1">No birthdays yet.<br>Click <b>＋ Add person</b> to get started.</div>`;
+    return;
+  }
+  if (!list.length) { el.innerHTML = `<div class="empty" style="grid-column:1/-1">No matches.</div>`; return; }
+
+  el.innerHTML = list.map(p => {
+    const d = daysUntil(p.dob), age = calcAge(p.dob);
+    const turning = isToday(p.dob) ? age : age + 1;
+    const cd = d === 0 ? `🎉 Birthday today — turning ${turning}!`
+      : `In ${d} day${d === 1 ? "" : "s"} · turns ${turning}`;
+    const wa = p.mobile ? `<a class="contact" title="WhatsApp" href="https://wa.me/${p.mobile.replace(/[^\d]/g, "")}?text=${encodeURIComponent("Happy Birthday " + p.name + "! 🎂")}" target="_blank">💬 WhatsApp</a>` : "";
+    const mail = p.email ? ` · <a class="contact" href="mailto:${esc(p.email)}">✉️ Email</a>` : "";
+    return `<div class="person${isToday(p.dob) ? " today" : ""}">
+      <div class="avatar" style="background:${colorFor(p.name)}">${esc(initials(p.name))}</div>
+      <div class="info">
+        <div class="name">${esc(p.name)}${p.relationship ? `<span class="rel">${esc(p.relationship)}</span>` : ""}</div>
+        <div class="meta">${fmtDate(p.dob)} · age ${age}</div>
+        <div class="countdown">${cd}</div>
+        ${(wa || mail) ? `<div class="meta">${wa}${mail}</div>` : ""}
+        ${p.gifts ? `<div class="meta">🎁 ${esc(p.gifts)}</div>` : ""}
+        ${p.notes ? `<div class="meta">📝 ${esc(p.notes)}</div>` : ""}
+      </div>
+      <div class="row-actions">
+        <button class="icon" onclick="editPerson('${p.id}')" title="Edit">✏️</button>
+        <button class="icon danger" onclick="delPerson('${p.id}')" title="Delete">🗑️</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function renderCalendar() {
+  const y = calDate.getFullYear(), m = calDate.getMonth();
+  $("#calTitle").textContent = calDate.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+  const first = new Date(y, m, 1).getDay();
+  const days = new Date(y, m + 1, 0).getDate();
+  const today = new Date();
+  const dows = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  let html = dows.map(d => `<div class="dow">${d}</div>`).join("");
+  for (let i = 0; i < first; i++) html += `<div class="cell empty-cell"></div>`;
+  for (let day = 1; day <= days; day++) {
+    const bdays = people.filter(p => { const b = parseDOB(p.dob); return b.getMonth() === m && b.getDate() === day; });
+    const isT = today.getFullYear() === y && today.getMonth() === m && today.getDate() === day;
+    html += `<div class="cell${isT ? " is-today" : ""}"><div class="d">${day}</div>${
+      bdays.map(p => `<div class="bday" title="${esc(p.name)}">🎂 ${esc(p.name.split(" ")[0])}</div>`).join("")
+    }</div>`;
+  }
+  $("#cal").innerHTML = html;
+}
+
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+/* ---------- CRUD ---------- */
+function openModal(person) {
+  editingId = person ? person.id : null;
+  $("#modalTitle").textContent = person ? "Edit person" : "Add person";
+  const f = $("#personForm");
+  f.reset();
+  if (person) for (const k in person) if (f.elements[k]) f.elements[k].value = person[k] || "";
+  $("#backdrop").classList.add("open");
+  f.elements.name.focus();
+}
+function closeModal() { $("#backdrop").classList.remove("open"); editingId = null; }
+
+window.editPerson = (id) => openModal(people.find(p => p.id === id));
+window.delPerson = (id) => {
+  const p = people.find(x => x.id === id);
+  if (confirm(`Delete ${p.name}?`)) { people = people.filter(x => x.id !== id); save(); toast("Deleted"); }
+};
+
+$("#personForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  if (editingId) {
+    people = people.map(p => p.id === editingId ? { ...p, ...data } : p);
+    toast("Updated");
+  } else {
+    people.push({ id: uid(), ...data });
+    toast("Added 🎉");
+  }
+  save(); closeModal();
+});
+
+/* ---------- CSV export / import ---------- */
+const CSV_COLS = ["name", "relationship", "dob", "mobile", "email", "address", "reminder", "gifts", "notes"];
+function toCSV() {
+  const head = CSV_COLS.join(",");
+  const rows = people.map(p => CSV_COLS.map(c => csvCell(p[c])).join(","));
+  return [head, ...rows].join("\r\n");
+}
+function csvCell(v) { v = (v ?? "").toString(); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+function parseCSV(text) {
+  const rows = []; let row = [], cell = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+      else if (c === '"') q = false;
+      else cell += c;
+    } else if (c === '"') q = true;
+    else if (c === ",") { row.push(cell); cell = ""; }
+    else if (c === "\n") { row.push(cell); rows.push(row); row = []; cell = ""; }
+    else if (c !== "\r") cell += c;
+  }
+  if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter(r => r.some(c => c.trim() !== ""));
+}
+function download(filename, content, type) {
+  const blob = new Blob([content], { type });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+$("#exportBtn").onclick = () => {
+  if (!people.length) return toast("Nothing to export");
+  download("birthdays.csv", "﻿" + toCSV(), "text/csv;charset=utf-8;"); // BOM = clean Excel open
+  toast("Exported CSV");
+};
+$("#importBtn").onclick = () => $("#csvFile").click();
+$("#csvFile").onchange = (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    const rows = parseCSV(r.result);
+    if (!rows.length) return toast("Empty file");
+    const header = rows[0].map(h => h.trim().toLowerCase());
+    let added = 0;
+    for (const row of rows.slice(1)) {
+      const rec = {}; header.forEach((h, i) => { if (CSV_COLS.includes(h)) rec[h] = (row[i] || "").trim(); });
+      if (rec.name && rec.dob && /^\d{4}-\d{2}-\d{2}$/.test(rec.dob)) { people.push({ id: uid(), ...rec }); added++; }
+    }
+    save(); toast(`Imported ${added} record${added === 1 ? "" : "s"}`);
+  };
+  r.readAsText(file); e.target.value = "";
+};
+
+/* ---------- Full backup / restore (JSON) ---------- */
+$("#backupBtn").onclick = () => {
+  download("birthday-book-backup.json", JSON.stringify(people, null, 2), "application/json");
+  toast("Backup saved");
+};
+$("#restoreBtn").onclick = () => $("#jsonFile").click();
+$("#jsonFile").onchange = (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const data = JSON.parse(r.result);
+      if (!Array.isArray(data)) throw 0;
+      if (confirm(`Restore ${data.length} records? This replaces your current data.`)) {
+        people = data.map(p => ({ id: p.id || uid(), ...p })); save(); toast("Restored");
+      }
+    } catch { toast("Invalid backup file"); }
+  };
+  r.readAsText(file); e.target.value = "";
+};
+
+/* ---------- View switching ---------- */
+document.querySelectorAll(".tabs button").forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    view = btn.dataset.view;
+    $("#listView").style.display = view === "list" ? "" : "none";
+    $("#calendarView").style.display = view === "calendar" ? "" : "none";
+    render();
+  };
+});
+$("#calPrev").onclick = () => { calDate = new Date(calDate.getFullYear(), calDate.getMonth() - 1, 1); renderCalendar(); };
+$("#calNext").onclick = () => { calDate = new Date(calDate.getFullYear(), calDate.getMonth() + 1, 1); renderCalendar(); };
+$("#calToday").onclick = () => { calDate = startOfMonth(new Date()); renderCalendar(); };
+
+/* ---------- Theme ---------- */
+function applyTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  $("#themeBtn").textContent = t === "dark" ? "☀️" : "🌙";
+  localStorage.setItem("bb_theme", t);
+}
+$("#themeBtn").onclick = () =>
+  applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
+applyTheme(localStorage.getItem("bb_theme") ||
+  (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+
+/* ---------- Wire up controls ---------- */
+$("#addBtn").onclick = () => openModal(null);
+$("#cancelBtn").onclick = closeModal;
+$("#backdrop").onclick = (e) => { if (e.target.id === "backdrop") closeModal(); };
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+["input", "change"].forEach(ev => {
+  $("#search").addEventListener(ev, renderList);
+  $("#filterRel").addEventListener(ev, renderList);
+  $("#sortBy").addEventListener(ev, renderList);
+});
+
+/* ---------- Seed a couple of samples on first ever run ---------- */
+if (!localStorage.getItem(STORE_KEY)) {
+  const y = new Date().getFullYear();
+  const mm = (n) => String(n).padStart(2, "0");
+  const t = new Date();
+  people = [
+    { id: uid(), name: "Sample — Today's Birthday", relationship: "Friend",
+      dob: `${y - 28}-${mm(t.getMonth() + 1)}-${mm(t.getDate())}`, gifts: "Coffee mug", notes: "Delete me anytime" },
+    { id: uid(), name: "Sample — Mom", relationship: "Mother", dob: "1965-04-15", mobile: "+15551234567", gifts: "Flowers" },
+  ];
+  save();
+}
+
+render();
+
+/* ---------- PWA: register service worker (only over http/https) ---------- */
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
