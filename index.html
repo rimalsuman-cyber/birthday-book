@@ -173,38 +173,40 @@
 </head>
 <body>
 <header>
-  <h1>🎂 Birthday Book</h1>
+  <h1>🎂 <span data-i18n="app.title">Birthday Book</span></h1>
   <div class="spacer"></div>
-  <button class="icon" id="themeBtn" title="Toggle light/dark">🌙</button>
-  <button class="icon" id="importBtn" title="Import CSV">⬆️ CSV</button>
-  <button class="icon" id="exportBtn" title="Export CSV / Excel">⬇️ CSV</button>
-  <button class="icon" id="backupBtn" title="Backup all data (JSON)">💾</button>
-  <button class="icon" id="restoreBtn" title="Restore backup">♻️</button>
-  <button class="primary" id="addBtn">＋ Add person</button>
+  <!-- Language selector (populated from the registered i18n files) -->
+  <select id="langSel" style="width:auto" aria-label="Language" data-i18n-title="header.language"></select>
+  <button class="icon" id="themeBtn">🌙</button>
+  <button class="icon" id="importBtn" data-i18n-title="header.importTitle">⬆️ CSV</button>
+  <button class="icon" id="exportBtn" data-i18n-title="header.exportTitle">⬇️ CSV</button>
+  <button class="icon" id="backupBtn" data-i18n-title="header.backupTitle">💾</button>
+  <button class="icon" id="restoreBtn" data-i18n-title="header.restoreTitle">♻️</button>
+  <button class="primary" id="addBtn">＋ <span data-i18n="header.add">Add person</span></button>
 </header>
 
 <main>
   <!-- Dashboard -->
   <section class="dash">
-    <div class="card"><div class="num" id="dTotal">0</div><div class="lbl">People</div></div>
-    <div class="card accent"><div class="num" id="dToday">0</div><div class="lbl">Today 🎉</div></div>
-    <div class="card"><div class="num" id="dMonth">0</div><div class="lbl">This month</div></div>
-    <div class="card"><div class="num" id="dNext" style="font-size:1.05rem">—</div><div class="lbl">Next up</div></div>
+    <div class="card"><div class="num" id="dTotal">0</div><div class="lbl" data-i18n="dash.people">People</div></div>
+    <div class="card accent"><div class="num" id="dToday">0</div><div class="lbl" data-i18n="dash.today">Today 🎉</div></div>
+    <div class="card"><div class="num" id="dMonth">0</div><div class="lbl" data-i18n="dash.month">This month</div></div>
+    <div class="card"><div class="num" id="dNext" style="font-size:1.05rem">—</div><div class="lbl" data-i18n="dash.next">Next up</div></div>
   </section>
 
   <!-- Toolbar -->
   <div class="toolbar">
-    <input class="grow" id="search" placeholder="🔍 Search by name…" />
+    <input class="grow" id="search" data-i18n-placeholder="toolbar.search" placeholder="Search by name…" />
     <select id="filterRel" style="width:auto"><option value="">All relationships</option></select>
     <select id="sortBy" style="width:auto">
-      <option value="upcoming">Sort: Upcoming</option>
-      <option value="name">Sort: Name</option>
-      <option value="age">Sort: Age</option>
-      <option value="month">Sort: Month/Day</option>
+      <option value="upcoming" data-i18n="toolbar.sortUpcoming">Sort: Upcoming</option>
+      <option value="name" data-i18n="toolbar.sortName">Sort: Name</option>
+      <option value="age" data-i18n="toolbar.sortAge">Sort: Age</option>
+      <option value="month" data-i18n="toolbar.sortMonth">Sort: Month/Day</option>
     </select>
     <div class="tabs">
-      <button data-view="list" class="active">List</button>
-      <button data-view="calendar">Calendar</button>
+      <button data-view="list" class="active" data-i18n="toolbar.viewList">List</button>
+      <button data-view="calendar" data-i18n="toolbar.viewCalendar">Calendar</button>
     </div>
   </div>
 
@@ -214,10 +216,10 @@
   <!-- Calendar view -->
   <div id="calendarView" style="display:none">
     <div class="cal-head">
-      <button class="icon" id="calPrev">‹</button>
+      <button class="icon" id="calPrev" data-i18n-title="calendar.prev">‹</button>
       <h2 id="calTitle"></h2>
-      <button class="icon" id="calNext">›</button>
-      <button class="icon" id="calToday">Today</button>
+      <button class="icon" id="calNext" data-i18n-title="calendar.nextBtn">›</button>
+      <button class="icon" id="calToday" data-i18n="calendar.today">Today</button>
     </div>
     <div class="cal" id="cal"></div>
   </div>
@@ -226,32 +228,47 @@
 <!-- Add/Edit modal -->
 <div class="backdrop" id="backdrop">
   <div class="modal">
-    <div class="m-head"><h2 id="modalTitle">Add person</h2></div>
+    <div class="m-head"><h2 id="modalTitle" data-i18n="form.addTitle">Add person</h2></div>
     <form id="personForm">
       <div class="m-body">
-        <div class="full"><label>Full name *</label><input name="name" required /></div>
+        <div class="full"><label data-i18n="form.name">Full name *</label><input name="name" required /></div>
         <div>
-          <label>Relationship</label>
+          <label data-i18n="form.relationship">Relationship</label>
+          <!-- value stays the English key so data/filtering are language-independent;
+               only the visible label is translated -->
           <select name="relationship">
-            <option>Friend</option><option>Brother</option><option>Sister</option>
-            <option>Mother</option><option>Father</option><option>Uncle</option>
-            <option>Aunt</option><option>Cousin</option><option>Grandparent</option>
-            <option>Colleague</option><option>Partner</option><option>Other</option>
+            <option value="Friend" data-i18n="rel.Friend">Friend</option>
+            <option value="Brother" data-i18n="rel.Brother">Brother</option>
+            <option value="Sister" data-i18n="rel.Sister">Sister</option>
+            <option value="Mother" data-i18n="rel.Mother">Mother</option>
+            <option value="Father" data-i18n="rel.Father">Father</option>
+            <option value="Uncle" data-i18n="rel.Uncle">Uncle</option>
+            <option value="Aunt" data-i18n="rel.Aunt">Aunt</option>
+            <option value="Cousin" data-i18n="rel.Cousin">Cousin</option>
+            <option value="Grandparent" data-i18n="rel.Grandparent">Grandparent</option>
+            <option value="Colleague" data-i18n="rel.Colleague">Colleague</option>
+            <option value="Partner" data-i18n="rel.Partner">Partner</option>
+            <option value="Other" data-i18n="rel.Other">Other</option>
           </select>
         </div>
-        <div><label>Date of birth *</label><input type="date" name="dob" required /></div>
-        <div><label>Mobile number</label><input name="mobile" placeholder="+1 555 123 4567" /></div>
-        <div><label>Email</label><input type="email" name="email" /></div>
-        <div class="full"><label>Address</label><input name="address" /></div>
-        <div><label>Reminder preference</label>
-          <select name="reminder"><option>None</option><option>Same day</option><option>1 day before</option><option>1 week before</option></select>
+        <div><label data-i18n="form.dob">Date of birth *</label><input type="date" name="dob" required /></div>
+        <div><label data-i18n="form.mobile">Mobile number</label><input name="mobile" data-i18n-placeholder="form.mobilePh" placeholder="+1 555 123 4567" /></div>
+        <div><label data-i18n="form.email">Email</label><input type="email" name="email" /></div>
+        <div class="full"><label data-i18n="form.address">Address</label><input name="address" /></div>
+        <div><label data-i18n="form.reminder">Reminder preference</label>
+          <select name="reminder">
+            <option value="None" data-i18n="reminder.none">None</option>
+            <option value="Same day" data-i18n="reminder.sameday">Same day</option>
+            <option value="1 day before" data-i18n="reminder.day1">1 day before</option>
+            <option value="1 week before" data-i18n="reminder.week1">1 week before</option>
+          </select>
         </div>
-        <div><label>Favorite gift ideas</label><input name="gifts" /></div>
-        <div class="full"><label>Notes</label><textarea name="notes" rows="2"></textarea></div>
+        <div><label data-i18n="form.gifts">Favorite gift ideas</label><input name="gifts" /></div>
+        <div class="full"><label data-i18n="form.notes">Notes</label><textarea name="notes" rows="2"></textarea></div>
       </div>
       <div class="m-foot">
-        <button type="button" id="cancelBtn">Cancel</button>
-        <button type="submit" class="primary">Save</button>
+        <button type="button" id="cancelBtn" data-i18n="form.cancel">Cancel</button>
+        <button type="submit" class="primary" data-i18n="form.save">Save</button>
       </div>
     </form>
   </div>
@@ -260,6 +277,16 @@
 <input type="file" id="csvFile" accept=".csv" hidden />
 <input type="file" id="jsonFile" accept=".json" hidden />
 <div id="toast"></div>
+
+<!-- i18n: core first, then one file per language (each self-registers).
+     To add a language: create i18n/<code>.js and add one <script> line below. -->
+<script src="i18n/i18n.js"></script>
+<script src="i18n/en.js"></script>
+<script src="i18n/de.js"></script>
+<script src="i18n/it.js"></script>
+<script src="i18n/fr.js"></script>
+<script src="i18n/tr.js"></script>
+<script src="i18n/sq.js"></script>
 
 <script>
 /* ============================================================
@@ -271,6 +298,14 @@
 
 const STORE_KEY = "birthdays_v1";
 const $ = (sel) => document.querySelector(sel);
+
+/* ---------- i18n shortcuts ---------- */
+const t = (k, v) => I18N.t(k, v);            // translate a string key
+const tp = (k, n, v) => I18N.tp(k, n, v);    // translate a pluralized key
+const fmtNum = (n) => new Intl.NumberFormat(I18N.locale()).format(n);
+// Translate a known relationship value; fall back to the raw stored value
+// (e.g. a custom relationship imported from CSV that isn't in the dictionary).
+function relLabel(v) { const s = I18N.t("rel." + v); return s === "rel." + v ? v : s; }
 
 let people = load();
 let editingId = null;
@@ -311,8 +346,11 @@ function isToday(dob) {
   const b = parseDOB(dob), t = new Date();
   return b.getMonth() === t.getMonth() && b.getDate() === t.getDate();
 }
+// Locale-aware date: month name, day and number formatting follow the
+// currently selected language's Intl locale.
 function fmtDate(dob) {
-  return parseDOB(dob).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return new Intl.DateTimeFormat(I18N.locale(), { day: "numeric", month: "short", year: "numeric" })
+    .format(parseDOB(dob));
 }
 
 /* ---------- Toast ---------- */
@@ -332,15 +370,16 @@ function renderDashboard() {
   $("#dMonth").textContent = people.filter(p => parseDOB(p.dob).getMonth() === thisMonth).length;
   const upcoming = [...people].sort((a, b) => daysUntil(a.dob) - daysUntil(b.dob))[0];
   $("#dNext").textContent = upcoming
-    ? `${upcoming.name.split(" ")[0]} · ${daysUntil(upcoming.dob) === 0 ? "today" : daysUntil(upcoming.dob) + "d"}`
-    : "—";
+    ? `${upcoming.name.split(" ")[0]} · ${daysUntil(upcoming.dob) === 0 ? t("dash.todayWord") : t("next.days", { n: daysUntil(upcoming.dob) })}`
+    : t("dash.none");
 }
 
 function renderRelFilter() {
   const sel = $("#filterRel"), cur = sel.value;
   const rels = [...new Set(people.map(p => p.relationship).filter(Boolean))].sort();
-  sel.innerHTML = '<option value="">All relationships</option>' +
-    rels.map(r => `<option${r === cur ? " selected" : ""}>${esc(r)}</option>`).join("");
+  // Option value is the stored (language-independent) relationship; the label is translated.
+  sel.innerHTML = `<option value="">${esc(t("toolbar.allRel"))}</option>` +
+    rels.map(r => `<option value="${esc(r)}"${r === cur ? " selected" : ""}>${esc(relLabel(r))}</option>`).join("");
 }
 
 function currentFiltered() {
@@ -372,31 +411,32 @@ function renderList() {
   const list = currentFiltered();
   const el = $("#list");
   if (!people.length) {
-    el.innerHTML = `<div class="empty" style="grid-column:1/-1">No birthdays yet.<br>Click <b>＋ Add person</b> to get started.</div>`;
+    el.innerHTML = `<div class="empty" style="grid-column:1/-1">${esc(t("list.emptyTitle"))}<br>${esc(t("list.emptyHint"))}</div>`;
     return;
   }
-  if (!list.length) { el.innerHTML = `<div class="empty" style="grid-column:1/-1">No matches.</div>`; return; }
+  if (!list.length) { el.innerHTML = `<div class="empty" style="grid-column:1/-1">${esc(t("list.noMatches"))}</div>`; return; }
 
   el.innerHTML = list.map(p => {
     const d = daysUntil(p.dob), age = calcAge(p.dob);
     const turning = isToday(p.dob) ? age : age + 1;
-    const cd = d === 0 ? `🎉 Birthday today — turning ${turning}!`
-      : `In ${d} day${d === 1 ? "" : "s"} · turns ${turning}`;
-    const wa = p.mobile ? `<a class="contact" title="WhatsApp" href="https://wa.me/${p.mobile.replace(/[^\d]/g, "")}?text=${encodeURIComponent("Happy Birthday " + p.name + "! 🎂")}" target="_blank">💬 WhatsApp</a>` : "";
-    const mail = p.email ? ` · <a class="contact" href="mailto:${esc(p.email)}">✉️ Email</a>` : "";
+    const cd = d === 0 ? t("list.countdownToday", { age: fmtNum(turning) })
+      : tp("list.countdownDays", d, { age: fmtNum(turning) });
+    // WhatsApp / email greetings use the translated greeting template (interface text, not user data).
+    const wa = p.mobile ? `<a class="contact" href="https://wa.me/${p.mobile.replace(/[^\d]/g, "")}?text=${encodeURIComponent(t("greeting.whatsapp", { name: p.name }))}" target="_blank">${t("list.whatsapp")}</a>` : "";
+    const mail = p.email ? ` · <a class="contact" href="mailto:${esc(p.email)}?subject=${encodeURIComponent(t("greeting.emailSubject"))}&body=${encodeURIComponent(t("greeting.emailBody", { name: p.name }))}">${t("list.email")}</a>` : "";
     return `<div class="person${isToday(p.dob) ? " today" : ""}">
       <div class="avatar" style="background:${colorFor(p.name)}">${esc(initials(p.name))}</div>
       <div class="info">
-        <div class="name">${esc(p.name)}${p.relationship ? `<span class="rel">${esc(p.relationship)}</span>` : ""}</div>
-        <div class="meta">${fmtDate(p.dob)} · age ${age}</div>
+        <div class="name">${esc(p.name)}${p.relationship ? `<span class="rel">${esc(relLabel(p.relationship))}</span>` : ""}</div>
+        <div class="meta">${fmtDate(p.dob)} · ${t("list.age", { n: fmtNum(age) })}</div>
         <div class="countdown">${cd}</div>
         ${(wa || mail) ? `<div class="meta">${wa}${mail}</div>` : ""}
-        ${p.gifts ? `<div class="meta">🎁 ${esc(p.gifts)}</div>` : ""}
-        ${p.notes ? `<div class="meta">📝 ${esc(p.notes)}</div>` : ""}
+        ${p.gifts ? `<div class="meta">${t("list.gifts", { text: esc(p.gifts) })}</div>` : ""}
+        ${p.notes ? `<div class="meta">${t("list.notes", { text: esc(p.notes) })}</div>` : ""}
       </div>
       <div class="row-actions">
-        <button class="icon" onclick="editPerson('${p.id}')" title="Edit">✏️</button>
-        <button class="icon danger" onclick="delPerson('${p.id}')" title="Delete">🗑️</button>
+        <button class="icon" onclick="editPerson('${p.id}')" title="${esc(t("list.edit"))}">✏️</button>
+        <button class="icon danger" onclick="delPerson('${p.id}')" title="${esc(t("list.remove"))}">🗑️</button>
       </div>
     </div>`;
   }).join("");
@@ -404,11 +444,14 @@ function renderList() {
 
 function renderCalendar() {
   const y = calDate.getFullYear(), m = calDate.getMonth();
-  $("#calTitle").textContent = calDate.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+  const loc = I18N.locale();
+  $("#calTitle").textContent = new Intl.DateTimeFormat(loc, { month: "long", year: "numeric" }).format(calDate);
   const first = new Date(y, m, 1).getDay();
   const days = new Date(y, m + 1, 0).getDate();
   const today = new Date();
-  const dows = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  // Localized short weekday names, Sunday-first (2023-01-01 was a Sunday) to match the grid.
+  const wdFmt = new Intl.DateTimeFormat(loc, { weekday: "short" });
+  const dows = Array.from({ length: 7 }, (_, i) => wdFmt.format(new Date(2023, 0, 1 + i)));
 
   let html = dows.map(d => `<div class="dow">${d}</div>`).join("");
   for (let i = 0; i < first; i++) html += `<div class="cell empty-cell"></div>`;
@@ -427,7 +470,7 @@ function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<"
 /* ---------- CRUD ---------- */
 function openModal(person) {
   editingId = person ? person.id : null;
-  $("#modalTitle").textContent = person ? "Edit person" : "Add person";
+  $("#modalTitle").textContent = person ? t("form.editTitle") : t("form.addTitle");
   const f = $("#personForm");
   f.reset();
   if (person) for (const k in person) if (f.elements[k]) f.elements[k].value = person[k] || "";
@@ -439,7 +482,7 @@ function closeModal() { $("#backdrop").classList.remove("open"); editingId = nul
 window.editPerson = (id) => openModal(people.find(p => p.id === id));
 window.delPerson = (id) => {
   const p = people.find(x => x.id === id);
-  if (confirm(`Delete ${p.name}?`)) { people = people.filter(x => x.id !== id); save(); toast("Deleted"); }
+  if (confirm(t("confirm.delete", { name: p.name }))) { people = people.filter(x => x.id !== id); save(); toast(t("toast.deleted")); }
 };
 
 $("#personForm").addEventListener("submit", (e) => {
@@ -447,10 +490,10 @@ $("#personForm").addEventListener("submit", (e) => {
   const data = Object.fromEntries(new FormData(e.target).entries());
   if (editingId) {
     people = people.map(p => p.id === editingId ? { ...p, ...data } : p);
-    toast("Updated");
+    toast(t("toast.updated"));
   } else {
     people.push({ id: uid(), ...data });
-    toast("Added 🎉");
+    toast(t("toast.added"));
   }
   save(); closeModal();
 });
@@ -487,9 +530,9 @@ function download(filename, content, type) {
 }
 
 $("#exportBtn").onclick = () => {
-  if (!people.length) return toast("Nothing to export");
+  if (!people.length) return toast(t("toast.nothingExport"));
   download("birthdays.csv", "﻿" + toCSV(), "text/csv;charset=utf-8;"); // BOM = clean Excel open
-  toast("Exported CSV");
+  toast(t("toast.exported"));
 };
 $("#importBtn").onclick = () => $("#csvFile").click();
 $("#csvFile").onchange = (e) => {
@@ -497,14 +540,14 @@ $("#csvFile").onchange = (e) => {
   const r = new FileReader();
   r.onload = () => {
     const rows = parseCSV(r.result);
-    if (!rows.length) return toast("Empty file");
+    if (!rows.length) return toast(t("toast.emptyFile"));
     const header = rows[0].map(h => h.trim().toLowerCase());
     let added = 0;
     for (const row of rows.slice(1)) {
       const rec = {}; header.forEach((h, i) => { if (CSV_COLS.includes(h)) rec[h] = (row[i] || "").trim(); });
       if (rec.name && rec.dob && /^\d{4}-\d{2}-\d{2}$/.test(rec.dob)) { people.push({ id: uid(), ...rec }); added++; }
     }
-    save(); toast(`Imported ${added} record${added === 1 ? "" : "s"}`);
+    save(); toast(tp("toast.imported", added, { n: added }));
   };
   r.readAsText(file); e.target.value = "";
 };
@@ -512,7 +555,7 @@ $("#csvFile").onchange = (e) => {
 /* ---------- Full backup / restore (JSON) ---------- */
 $("#backupBtn").onclick = () => {
   download("birthday-book-backup.json", JSON.stringify(people, null, 2), "application/json");
-  toast("Backup saved");
+  toast(t("toast.backupSaved"));
 };
 $("#restoreBtn").onclick = () => $("#jsonFile").click();
 $("#jsonFile").onchange = (e) => {
@@ -522,10 +565,10 @@ $("#jsonFile").onchange = (e) => {
     try {
       const data = JSON.parse(r.result);
       if (!Array.isArray(data)) throw 0;
-      if (confirm(`Restore ${data.length} records? This replaces your current data.`)) {
-        people = data.map(p => ({ id: p.id || uid(), ...p })); save(); toast("Restored");
+      if (confirm(tp("confirm.restore", data.length, { n: data.length }))) {
+        people = data.map(p => ({ id: p.id || uid(), ...p })); save(); toast(t("toast.restored"));
       }
-    } catch { toast("Invalid backup file"); }
+    } catch { toast(t("toast.invalidBackup")); }
   };
   r.readAsText(file); e.target.value = "";
 };
@@ -546,15 +589,40 @@ $("#calNext").onclick = () => { calDate = new Date(calDate.getFullYear(), calDat
 $("#calToday").onclick = () => { calDate = startOfMonth(new Date()); renderCalendar(); };
 
 /* ---------- Theme ---------- */
-function applyTheme(t) {
-  document.documentElement.setAttribute("data-theme", t);
-  $("#themeBtn").textContent = t === "dark" ? "☀️" : "🌙";
-  localStorage.setItem("bb_theme", t);
+function applyTheme(th) {
+  document.documentElement.setAttribute("data-theme", th);
+  $("#themeBtn").textContent = th === "dark" ? "☀️" : "🌙";
+  $("#themeBtn").title = I18N.t(th === "dark" ? "header.themeLight" : "header.themeDark");
+  localStorage.setItem("bb_theme", th);
 }
 $("#themeBtn").onclick = () =>
   applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
 applyTheme(localStorage.getItem("bb_theme") ||
   (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+
+/* ---------- i18n wiring ---------- */
+// Fill in every element that carries a data-i18n* attribute.
+function applyStatic(root = document) {
+  root.querySelectorAll("[data-i18n]").forEach(el => el.textContent = I18N.t(el.dataset.i18n));
+  root.querySelectorAll("[data-i18n-placeholder]").forEach(el => el.placeholder = I18N.t(el.dataset.i18nPlaceholder));
+  root.querySelectorAll("[data-i18n-title]").forEach(el => el.title = I18N.t(el.dataset.i18nTitle));
+}
+// Build the language selector from whatever language files registered.
+function buildLangSelector() {
+  const sel = $("#langSel");
+  sel.innerHTML = I18N.languages().map(l => `<option value="${l.code}">${esc(l.native)}</option>`).join("");
+  sel.value = I18N.current();
+}
+// Runs on every language change: static text, chrome, then a full re-render.
+function onLangChange() {
+  applyStatic();
+  $("#langSel").value = I18N.current();
+  document.title = "🎂 " + I18N.t("app.title");
+  applyTheme(document.documentElement.getAttribute("data-theme")); // refresh theme tooltip in new language
+  render();
+}
+$("#langSel").onchange = (e) => I18N.setLang(e.target.value);
+document.addEventListener("i18n:change", onLangChange);
 
 /* ---------- Wire up controls ---------- */
 $("#addBtn").onclick = () => openModal(null);
@@ -580,7 +648,9 @@ if (!localStorage.getItem(STORE_KEY)) {
   save();
 }
 
-render();
+/* ---------- Initialize i18n, then render ---------- */
+buildLangSelector();
+I18N.init();  // picks saved/browser/English language and fires i18n:change → onLangChange → render()
 
 /* ---------- PWA: register service worker (only over http/https) ---------- */
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
